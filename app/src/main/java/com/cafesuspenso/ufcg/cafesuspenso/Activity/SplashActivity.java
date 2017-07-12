@@ -6,11 +6,23 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
+import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class SplashActivity extends Activity {
@@ -25,6 +37,8 @@ public class SplashActivity extends Activity {
         Animation myFadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in);
         myImageView.startAnimation(myFadeInAnimation);
 
+        loadCafeterias();
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -34,6 +48,41 @@ public class SplashActivity extends Activity {
 
     }
 
+    private void loadCafeterias() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "https://cafesuspenso.herokuapp.com/api/cafeteria";
+
+        Log.d("Login3", url);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("Login4", response);
+                        saveMarkers(response, "cafeterias");
+                        // openLoginScreen();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("LoginE toString", error.toString());
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "RO1TNoKtrUfNSclm8jQs8L3RMX43");
+                return params;
+            }
+        };
+        queue.add(stringRequest);
+    }
+
+    private void saveMarkers(String timeLine, String result) {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(result, timeLine);
+        editor.apply();
+    }
 
 
     private void openLoginScreen() {

@@ -30,6 +30,13 @@ public class Cafeteria extends User implements Parcelable {
         this.active = Boolean.FALSE;
     }
 
+    public Cafeteria(String name, LatLng location, String imagem, int availableCoffee){
+        this.placename = name;
+        this.location = location;
+        this.imagem = imagem;
+        this.availableCoffee = availableCoffee;
+    }
+
     public Cafeteria() {
     }
 

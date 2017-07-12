@@ -17,6 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAlignment="center"
+            android:layout_marginTop="50dp"
             android:id="@+id/namePlace"
             android:textColor="@color/white"
             android:textSize="30dp"
@@ -26,6 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:layout_marginLeft="10dp"
+            android:visibility="gone"
             android:layout_marginRight="10dp"
             android:id="@+id/descriptionPlace"
             android:textAlignment="center"
@@ -37,7 +39,7 @@
             android:layout_width="match_parent"
             android:scaleType="centerCrop"
             android:layout_height="200dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="55dp"
             android:src="@color/colorAccent" />
 
         <TextView

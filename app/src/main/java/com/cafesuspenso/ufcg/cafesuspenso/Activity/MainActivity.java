@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -36,6 +37,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.squareup.picasso.Picasso;
 
 import butterknife.ButterKnife;
 
@@ -116,8 +118,7 @@ public class MainActivity extends AppCompatActivity
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         nameUser.setText(user.getDisplayName());
         classUser.setText(user.getEmail());
-        new DownloadImageTask(imageUser)
-                .execute(user.getPhotoUrl().toString());
+        Picasso.with(this).load(Uri.parse(user.getPhotoUrl().toString())).into(imageUser);
 
         mapsFragment = new MapsFragment();
         aboutFragment = new AboutFragment();
@@ -163,16 +164,16 @@ public class MainActivity extends AppCompatActivity
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null) {
             if (result.getContents() == null){
-                // Toast.makeText(this, getString(R.string.qr_code_fail_menssage), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.qr_code_fail_menssage), Toast.LENGTH_LONG).show();
             }else {
-                /**
-                 Intent readerIntent = new Intent(this, ViewInformationCafeteria.class);
+                 Log.d("QRCODE", "QRCODE1");
+                 Intent readerIntent = new Intent(this, CafeteriaActivity.class);
                  Bundle bundle = new Bundle();
 
                  bundle.putString("qrCodeData", result.getContents());
+                 bundle.putBoolean("qrCode", true);
                  readerIntent.putExtras(bundle);
                  startActivity(readerIntent);
-                 */
             }
         }else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -218,7 +219,9 @@ public class MainActivity extends AppCompatActivity
                 editor.putBoolean("isLogged", false);
                 editor.apply();
                 callLoginActivity();
-            } else if (id == R.id.nav_about) {
+            }
+
+            /**else if (id == R.id.nav_about) {
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.container, aboutFragment);
                 fragmentTransaction.addToBackStack(null);
@@ -250,6 +253,7 @@ public class MainActivity extends AppCompatActivity
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
             }
+             */
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

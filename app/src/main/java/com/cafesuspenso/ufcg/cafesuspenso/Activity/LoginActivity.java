@@ -6,16 +6,26 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.Profile;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -25,6 +35,9 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -36,11 +49,17 @@ public class LoginActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
     FirebaseAuth.AuthStateListener firebaseAuthListener;
+    private RequestQueue queue;
+    private String token;
+    private boolean first = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        FirebaseAuth.getInstance().signOut();
+        LoginManager.getInstance().logOut();
 
         loginButton = (LoginButton) findViewById(R.id.login_button);
         progressLogin = (ProgressBar) findViewById(R.id.progress_bar);
@@ -48,9 +67,12 @@ public class LoginActivity extends AppCompatActivity {
         callbackManager = CallbackManager.Factory.create();
         layout = (LinearLayout) findViewById(R.id.layout_login);
 
+        queue = Volley.newRequestQueue(this);
+
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
+                token = loginResult.getAccessToken().toString();
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
@@ -70,7 +92,9 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
+                if (user != null & first) {
+                    token = user.getUid();
+                    first = false;
                     callMain();
                 }
             }
@@ -78,6 +102,70 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void callMain() {
+        /**
+        String url = "https://cafesuspenso.herokuapp.com/api/auth";
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        url += "?name=" + user.getDisplayName().replace(" ", "%") + "&email=" + user.getEmail();
+        url += "&urlImage=" + user.getPhotoUrl().toString().replace("&","+") + "&token=" + token.toString();
+
+        Log.d("Login1", url);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("Login2", "Logado");
+                        fetchCafeterias();
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("Login", "erro login");
+            }
+        });
+        queue.add(stringRequest);
+         */
+        fetchCafeterias();
+    }
+
+    private void fetchCafeterias() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "https://cafesuspenso.herokuapp.com/api/cafeteria";
+
+        Log.d("Login3", url);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("Login4", response);
+                        saveMarkers(response, "cafeterias");
+                        startMain();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("LoginE toString", error.toString());
+                startMain();
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "RO1TNoKtrUfNSclm8jQs8L3RMX43");
+                return params;
+            }
+        };
+        queue.add(stringRequest);
+    }
+
+    private void saveMarkers(String timeLine, String result) {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(result, timeLine);
+        editor.apply();
+    }
+
+    private void startMain() {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean("isLogged", true);

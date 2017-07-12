@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +15,7 @@ import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +33,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MapsFragment extends SupportMapFragment implements OnMapReadyCallback {
 
@@ -104,25 +112,30 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
     private void loadMarkers(GoogleMap mMap) {
         cafeterias = new ArrayList<>();
-        LatLng caf1 = new LatLng(-7.24833418, -35.89189947);
-        LatLng caf2 = new LatLng(-7.24659935, -35.89460313);
-        LatLng caf3 = new LatLng(-7.24530218, -35.89180147);
-        LatLng caf4 = new LatLng(-7.24749935, -35.89260113);
+        SharedPreferences sharedPref = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        String JSONMarkers = sharedPref.getString("cafeterias", null);
 
-        //TODO CARREGAR MAPA COM CAFETERIAS
-        Cafeteria cafeteria1 = new Cafeteria("João", "joao@gmail.com", "12398", "Café do João", "O café do João é o café mais saudavel do bairro, venha já conferir...", "CNPJ AQUI", caf1, "http://valealternativo.com.br/uploads/noticias/1aa8d5668ea39233ad5079ffbec2db37_400.JPG");
-        cafeteria1.setAvailableCoffee(0);
-        Cafeteria cafeteria2 = new Cafeteria("Maria", "maria@gmail.com", "12398", "Pé de café Cafeteria", "O café da Maria é o café mais saudavel do bairro, venha já conferir...", "CNPJ AQUI", caf2, "http://www.radioguaiba.com.br/wp-content/uploads/2015/09/20150917_121306.jpg");
-        cafeteria2.setAvailableCoffee(15);
-        Cafeteria cafeteria3 = new Cafeteria("Antonio", "antonio@gmail.com", "12398", "Café da Praça", "O café da Praça é o café mais saudavel do bairro, venha já conferir...", "CNPJ AQUI", caf3, "http://bloglovers.com.br/wp-content/uploads/2014/06/cafe-da-praca-2_Fotor.jpg");
-        cafeteria3.setAvailableCoffee(3);
-        Cafeteria cafeteria4 = new Cafeteria("Jardel", "jardel@gmail.com", "12398", "Café do Bairro", "O café do Bairro é o café mais saudavel do bairro, venha já conferir...", "CNPJ AQUI", caf4, "http://www.centerjeans.com.br/lazer-e-alimentacao/img/cafe-do-bairro.jpg");
-        cafeteria4.setAvailableCoffee(0);
+        if(JSONMarkers != null){
+            Random random = new Random();
+            try {
+                JSONArray responsePost = new JSONArray(JSONMarkers);
+                for (int i = 0; i < responsePost.length(); i++) {
+                    JSONObject marked = responsePost.getJSONObject(i);
 
-        cafeterias.add(cafeteria1);
-        cafeterias.add(cafeteria2);
-        cafeterias.add(cafeteria3);
-        cafeterias.add(cafeteria4);
+                    String name = marked.getString("name");
+                    JSONObject location = marked.getJSONObject("location");
+                    LatLng latLng = new LatLng(location.getDouble("lat"),location.getDouble("lng"));
+                    String imagem = marked.getString("imagem");
+
+                    int qntdCafe = random.nextInt(5);
+                    cafeterias.add(new Cafeteria(name,latLng,imagem,qntdCafe));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+
         Bitmap coffeeBig = BitmapFactory.decodeResource(getResources(), R.drawable.coffee);
         Bitmap resized = Bitmap.createScaledBitmap(coffeeBig, 50, 50, true);
         BitmapDescriptor coffee = BitmapDescriptorFactory.fromBitmap(resized);
