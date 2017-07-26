@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Cafeteria;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Product;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.QRCodeData;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.cafesuspenso.ufcg.cafesuspenso.Task.DownloadImageTask;
@@ -61,11 +62,10 @@ public class CafeteriaActivity extends AppCompatActivity {
         shareBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /**
-                Intent i = new Intent(getApplicationContext(), ShareCoffeeActivity.class);
-                startActivity(i);
+                Intent intent = new Intent(getApplicationContext(), ShareCoffeeActivity.class);
+                intent.putExtra("cafeteria", getIntent().getParcelableExtra("cafeteria"));
+                startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-                */
             }
         });
 
@@ -76,12 +76,11 @@ public class CafeteriaActivity extends AppCompatActivity {
         redeemBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /**
                     Intent i = new Intent(getApplicationContext(), RedeemCoffeeActivity.class);
+                    i.putExtra("cafeteria", getIntent().getParcelableExtra("cafeteria"));
                     startActivity(i);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
-                 */
             }
         });
     }

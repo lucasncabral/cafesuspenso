@@ -86,7 +86,6 @@ public class SplashActivity extends Activity {
 
 
     private void openLoginScreen() {
-
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         boolean isLogged = sharedPref.getBoolean("isLogged", false);
 

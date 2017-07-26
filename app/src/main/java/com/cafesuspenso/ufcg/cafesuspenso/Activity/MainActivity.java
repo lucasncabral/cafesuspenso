@@ -30,6 +30,7 @@ import com.cafesuspenso.ufcg.cafesuspenso.Fragment.MapsFragment;
 import com.cafesuspenso.ufcg.cafesuspenso.Fragment.MyTransactionsFragment;
 import com.cafesuspenso.ufcg.cafesuspenso.Fragment.RankingFragment;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Cafeteria;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Product;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.cafesuspenso.ufcg.cafesuspenso.Task.DownloadImageTask;
 import com.facebook.login.LoginManager;
@@ -166,14 +167,14 @@ public class MainActivity extends AppCompatActivity
             if (result.getContents() == null){
                 Toast.makeText(this, getString(R.string.qr_code_fail_menssage), Toast.LENGTH_LONG).show();
             }else {
-                 Log.d("QRCODE", "QRCODE1");
-                 Intent readerIntent = new Intent(this, CafeteriaActivity.class);
-                 Bundle bundle = new Bundle();
+                Log.d("QRCODE", "QRCODE1");
+                Intent readerIntent = new Intent(this, CafeteriaActivity.class);
+                Bundle bundle = new Bundle();
 
-                 bundle.putString("qrCodeData", result.getContents());
-                 bundle.putBoolean("qrCode", true);
-                 readerIntent.putExtras(bundle);
-                 startActivity(readerIntent);
+                bundle.putString("qrCodeData", result.getContents());
+                bundle.putBoolean("qrCode", true);
+                readerIntent.putExtras(bundle);
+                startActivity(readerIntent);
             }
         }else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -219,9 +220,7 @@ public class MainActivity extends AppCompatActivity
                 editor.putBoolean("isLogged", false);
                 editor.apply();
                 callLoginActivity();
-            }
-
-            /**else if (id == R.id.nav_about) {
+            }else if (id == R.id.nav_about) {
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.container, aboutFragment);
                 fragmentTransaction.addToBackStack(null);
@@ -240,6 +239,7 @@ public class MainActivity extends AppCompatActivity
                 fragmentTransaction.replace(R.id.container, transactionFragment);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
+            /*
             } else if (id == R.id.nav_my_top_donator){
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 rankingFragment = new RankingFragment();
@@ -254,6 +254,7 @@ public class MainActivity extends AppCompatActivity
                 fragmentTransaction.commit();
             }
              */
+            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -301,4 +302,5 @@ public class MainActivity extends AppCompatActivity
     public void setCafeteriaSelected(Cafeteria cafeteriaSelected) {
         this.cafeteriaSelected = cafeteriaSelected;
     }
+
 }

@@ -7,20 +7,37 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.cafesuspenso.ufcg.cafesuspenso.Adapter.TransactionAdapter;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Cafeteria;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Product;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Transaction;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
+import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class MyTransactionsFragment extends Fragment {
@@ -42,10 +59,10 @@ public class MyTransactionsFragment extends Fragment {
         titleFragment = (TextView) v.findViewById(R.id.title);
         titleFragment.setText(title);
 
+        this.recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         transactions = fetchTransactions();
         this.transactionAdapter = new TransactionAdapter(getContext(), transactions);
 
-        this.recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         registerForContextMenu(recyclerView);
         this.recyclerView.setAdapter(transactionAdapter);
         LinearLayoutManager linearLayoutManager =  new LinearLayoutManager(getContext());
@@ -60,33 +77,88 @@ public class MyTransactionsFragment extends Fragment {
         List<Transaction> result = new ArrayList<>();
         Transaction t;
 
-        Random rand = new Random();
-        Date d;
-        for(int i =0;i < 10;i++){
-            d = new Date();
-            d.setDate(rand.nextInt(28) + 1);
-            if(i % 2 == 0)
-                t = new Transaction("Café do João", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_kI9_JqAXLig08HI_eS69-2vJ09gd9bcXhArdhQXL4m2yA0c8",d);
-            else if (i % 3 == 0)
-                t = new Transaction("Café da Maria", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTVsVLM1WZCgWPzW5j3feNsTPBSLDDxozCCNmEwJjAylHpgv3onfA",d);
-            else
-                t = new Transaction("Café do Bairro", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAwI9Db5c-fxdBiWn-ErVO2m3zzp96Cdgtv8f2iznymYhrK8CZcQ",d);
-            result.add(t);
-        }
+        getTransactions();
 
         Collections.sort(result, new Comparator<Transaction>() {
             @Override
             public int compare(Transaction transaction, Transaction t1) {
-                if(transaction.getDate().after(t1.getDate()))
+                if (transaction.getDate().after(t1.getDate()))
                     return -1;
                 else
                     return 1;
             }
         });
-        return  result;
+        return result;
     }
 
     public void changeTitle(String title){
         this.title = title;
     }
+
+    public void getTransactions() {
+        RequestQueue queue = Volley.newRequestQueue(getContext());
+        String url = "https://cafesuspenso.herokuapp.com/api/user/shared_products";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("Transactions", response);
+                        saveTransactions(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("LoginE toString", error.toString());
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "RO1TNoKtrUfNSclm8jQs8L3RMX43");
+                return params;
+            }
+        };
+        queue.add(stringRequest);
+    }
+
+    private void saveTransactions(String response) {
+        ArrayList result = new ArrayList<>();
+        Random rand = new Random();
+        Date d;
+        d = new Date();
+
+        if(response != null){
+            Random random = new Random();
+            try {
+                JSONArray responsePost = new JSONArray(response);
+
+                for (int i = 0; i < responsePost.length(); i++) {
+                    JSONObject marked = responsePost.getJSONObject(i);
+
+                    String name = marked.getString("name");
+                    int id = marked.getInt("id");
+                    String description = marked.getString("description");
+                    Double price = marked.getDouble("price");
+                    String imagem = marked.getString("image");
+                    Boolean accepted = marked.getBoolean("accepted");
+                    result.add(new Transaction(id,description,imagem,d,name,price));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        transactions = result;
+        this.transactionAdapter = new TransactionAdapter(getContext(), transactions);
+        registerForContextMenu(recyclerView);
+        this.recyclerView.setAdapter(transactionAdapter);
+        LinearLayoutManager linearLayoutManager =  new LinearLayoutManager(getContext());
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        this.recyclerView.setLayoutManager(linearLayoutManager);
+        transactionAdapter.update(transactions);
+
+    }
+
+
 }

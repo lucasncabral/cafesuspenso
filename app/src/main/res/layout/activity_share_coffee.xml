@@ -47,10 +47,23 @@
         android:orientation="vertical"
         android:gravity="center">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20dp"
+            android:id="@+id/txt_name_product"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:text="Item:"
+            tools:layout_editor_absoluteY="0dp"
+            tools:layout_editor_absoluteX="8dp" />
+        <!--
         <Spinner
             android:id="@+id/spinner"
+
             android:layout_width="300dp"
             android:layout_height="wrap_content" />
+            -->
         </LinearLayout>
 
     <TextView
@@ -60,7 +73,7 @@
         android:layout_marginTop="25dp"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:text="Quantidade:"
+        android:text="Preço:"
         tools:layout_editor_absoluteY="0dp"
         tools:layout_editor_absoluteX="8dp" />
 
@@ -68,7 +81,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/white"
-        android:id="@+id/countCoffee"
+        android:id="@+id/txt_preco"
         android:layout_marginTop="10dp"
         android:textAlignment="center"
         android:textSize="30dp"

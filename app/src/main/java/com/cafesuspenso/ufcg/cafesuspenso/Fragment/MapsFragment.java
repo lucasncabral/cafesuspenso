@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import com.cafesuspenso.ufcg.cafesuspenso.Activity.MainActivity;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Cafeteria;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Product;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -53,6 +54,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
     private MainActivity main;
     private List<Cafeteria> cafeterias;
     Cafeteria selected;
+    private Product product1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -126,9 +128,11 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
                     JSONObject location = marked.getJSONObject("location");
                     LatLng latLng = new LatLng(location.getDouble("lat"),location.getDouble("lng"));
                     String imagem = marked.getString("imagem");
+                    int qntdCafe = marked.getInt("numberProduct");
 
-                    int qntdCafe = random.nextInt(5);
-                    cafeterias.add(new Cafeteria(name,latLng,imagem,qntdCafe));
+                    JSONObject product = marked.getJSONObject("product");
+                    product1 = new Product(product.getInt("id"), product.getDouble("price"),product.getString("image"), product.getString("description"), product.getBoolean("accepted"), product.getString("name"));
+                    cafeterias.add(new Cafeteria(name,latLng,imagem,qntdCafe, product1));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

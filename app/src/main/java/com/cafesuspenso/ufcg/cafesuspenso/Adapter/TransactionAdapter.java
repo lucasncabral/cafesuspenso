@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +14,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Transaction;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.cafesuspenso.ufcg.cafesuspenso.Task.DownloadImageTask;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Lucas on 19/06/2017.
@@ -45,7 +56,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        Transaction t = transactions.get(position);
+        final Transaction t = transactions.get(position);
         holder.iconDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,6 +65,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                             public void onClick(DialogInterface dialog, int whichButton) {
+                                removeTransaction(t.getId());
                                 transactions.remove(position);
                                 update(transactions);
                             }})
@@ -61,9 +73,37 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             }
         });
 
-        holder.description.setText(t.getDescription());
+        holder.description.setText(t.getName());
         holder.date.setText(new SimpleDateFormat("dd-MM-yyyy").format(t.getDate()));
-        new DownloadImageTask(holder.image).execute(transactions.get(position).getImage());
+        Picasso.with(context).load(Uri.parse(transactions.get(position).getImage())).fit().into(holder.image);
+       // new DownloadImageTask(holder.image).execute(transactions.get(position).getImage());
+    }
+
+    public void removeTransaction(int t){
+        RequestQueue queue = Volley.newRequestQueue(context);
+        String url = "https://cafesuspenso.herokuapp.com/api/user/shared_products/remove_shared_product/" + t;
+
+        Log.d("Login3", url);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("RemoveTransaction", response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("LoginE toString", error.toString());
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "RO1TNoKtrUfNSclm8jQs8L3RMX43");
+                return params;
+            }
+        };
+        queue.add(stringRequest);
     }
 
     @Override

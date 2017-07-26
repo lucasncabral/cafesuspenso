@@ -19,6 +19,7 @@ public class Cafeteria extends User implements Parcelable {
     private String imagem;
     private byte[] qrCodePic;
     private int availableCoffee;
+    private Product product;
 
     public Cafeteria(String name, String email, String password, String placename, String complement, String cnpj, LatLng location, String imagem) {
         super(name, email, password, TypeUser.CAFETERIA);
@@ -30,14 +31,12 @@ public class Cafeteria extends User implements Parcelable {
         this.active = Boolean.FALSE;
     }
 
-    public Cafeteria(String name, LatLng location, String imagem, int availableCoffee){
+    public Cafeteria(String name, LatLng location, String imagem, int availableCoffee, Product product){
         this.placename = name;
         this.location = location;
         this.imagem = imagem;
         this.availableCoffee = availableCoffee;
-    }
-
-    public Cafeteria() {
+        this.product = product;
     }
 
     protected Cafeteria(Parcel in) {
@@ -48,6 +47,7 @@ public class Cafeteria extends User implements Parcelable {
         imagem = in.readString();
         qrCodePic = in.createByteArray();
         availableCoffee = in.readInt();
+        product = in.readParcelable(Product.class.getClassLoader());
     }
 
     public static final Creator<Cafeteria> CREATOR = new Creator<Cafeteria>() {
@@ -61,6 +61,14 @@ public class Cafeteria extends User implements Parcelable {
             return new Cafeteria[size];
         }
     };
+
+    public Product getProduct(){
+        return this.product;
+    }
+
+    public Cafeteria() {
+    }
+
 
     public String getPlacename() {
         return placename;
@@ -133,6 +141,7 @@ public class Cafeteria extends User implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+
         parcel.writeString(placename);
         parcel.writeString(complement);
         parcel.writeString(cnpj);
@@ -140,5 +149,7 @@ public class Cafeteria extends User implements Parcelable {
         parcel.writeString(imagem);
         parcel.writeByteArray(qrCodePic);
         parcel.writeInt(availableCoffee);
+        parcel.writeParcelable(product, i);
     }
+
 }
