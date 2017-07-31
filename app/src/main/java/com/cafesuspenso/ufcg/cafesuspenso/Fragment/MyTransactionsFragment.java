@@ -46,6 +46,7 @@ public class MyTransactionsFragment extends Fragment {
     private RecyclerView recyclerView;
     private String title;
     private TextView titleFragment;
+    private boolean flag;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,7 +62,7 @@ public class MyTransactionsFragment extends Fragment {
 
         this.recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         transactions = fetchTransactions();
-        this.transactionAdapter = new TransactionAdapter(getContext(), transactions);
+        this.transactionAdapter = new TransactionAdapter(getContext(), transactions, flag);
 
         registerForContextMenu(recyclerView);
         this.recyclerView.setAdapter(transactionAdapter);
@@ -77,7 +78,10 @@ public class MyTransactionsFragment extends Fragment {
         List<Transaction> result = new ArrayList<>();
         Transaction t;
 
-        getTransactions();
+        if(flag)
+            getTransactionsRedeemed();
+        else
+            getTransactionsShared();
 
         Collections.sort(result, new Comparator<Transaction>() {
             @Override
@@ -93,11 +97,42 @@ public class MyTransactionsFragment extends Fragment {
 
     public void changeTitle(String title){
         this.title = title;
+        if(title.equals("Meus resgates"))
+            flag = true;
+        else
+            flag = false;
     }
 
-    public void getTransactions() {
+    public void getTransactionsShared() {
         RequestQueue queue = Volley.newRequestQueue(getContext());
         String url = "https://cafesuspenso.herokuapp.com/api/user/shared_products";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("Transactions", response);
+                        saveTransactions(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("LoginE toString", error.toString());
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "RO1TNoKtrUfNSclm8jQs8L3RMX43");
+                return params;
+            }
+        };
+        queue.add(stringRequest);
+    }
+
+    public void getTransactionsRedeemed() {
+        RequestQueue queue = Volley.newRequestQueue(getContext());
+        String url = "https://cafesuspenso.herokuapp.com/api/user/redeem_products";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -150,7 +185,7 @@ public class MyTransactionsFragment extends Fragment {
         }
 
         transactions = result;
-        this.transactionAdapter = new TransactionAdapter(getContext(), transactions);
+        this.transactionAdapter = new TransactionAdapter(getContext(), transactions, flag);
         registerForContextMenu(recyclerView);
         this.recyclerView.setAdapter(transactionAdapter);
         LinearLayoutManager linearLayoutManager =  new LinearLayoutManager(getContext());

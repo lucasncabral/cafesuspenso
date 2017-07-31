@@ -36,13 +36,15 @@ import java.util.Map;
  */
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHolder> {
+    private boolean flagType = false;
     private final LayoutInflater layoutInflater;
     private Context context;
     private List<Transaction> transactions;
 
-    public TransactionAdapter(Context context, List<Transaction> transactions){
+    public TransactionAdapter(Context context, List<Transaction> transactions, boolean flag){
         this.context = context;
         this.transactions = transactions;
+        flagType = flag;
         this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
     }
@@ -81,7 +83,11 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     public void removeTransaction(int t){
         RequestQueue queue = Volley.newRequestQueue(context);
-        String url = "https://cafesuspenso.herokuapp.com/api/user/shared_products/remove_shared_product/" + t;
+        String url;
+        if(!flagType)
+            url = "https://cafesuspenso.herokuapp.com/api/user/shared_products/remove_shared_product/" + t;
+        else
+            url = "https://cafesuspenso.herokuapp.com/api/user/shared_products/remove_redeemed_product/" + t;
 
         Log.d("Login3", url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
