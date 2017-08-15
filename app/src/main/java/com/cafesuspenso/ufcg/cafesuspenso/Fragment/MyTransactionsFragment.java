@@ -105,7 +105,7 @@ public class MyTransactionsFragment extends Fragment {
 
     public void getTransactionsShared() {
         RequestQueue queue = Volley.newRequestQueue(getContext());
-        String url = "https://cafesuspenso.herokuapp.com/api/user/shared_products";
+        String url = "http://192.168.130.14:8080/api/user/shared_products";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -123,7 +123,7 @@ public class MyTransactionsFragment extends Fragment {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "RO1TNoKtrUfNSclm8jQs8L3RMX43");
+                params.put("Authorization", "lucas123");
                 return params;
             }
         };
@@ -132,7 +132,7 @@ public class MyTransactionsFragment extends Fragment {
 
     public void getTransactionsRedeemed() {
         RequestQueue queue = Volley.newRequestQueue(getContext());
-        String url = "https://cafesuspenso.herokuapp.com/api/user/redeem_products";
+        String url = "http://192.168.130.14:8080/api/user/redeem_products";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -150,7 +150,7 @@ public class MyTransactionsFragment extends Fragment {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "RO1TNoKtrUfNSclm8jQs8L3RMX43");
+                params.put("Authorization", "lucas123");
                 return params;
             }
         };

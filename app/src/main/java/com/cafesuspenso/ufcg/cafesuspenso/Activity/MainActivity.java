@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cafesuspenso.ufcg.cafesuspenso.Fragment.AboutFragment;
+import com.cafesuspenso.ufcg.cafesuspenso.Fragment.LevelUpFragment;
 import com.cafesuspenso.ufcg.cafesuspenso.Fragment.MapsFragment;
 import com.cafesuspenso.ufcg.cafesuspenso.Fragment.MyTransactionsFragment;
 import com.cafesuspenso.ufcg.cafesuspenso.Fragment.RankingFragment;
@@ -118,7 +119,23 @@ public class MainActivity extends AppCompatActivity
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         nameUser.setText(user.getDisplayName());
-        classUser.setText(user.getEmail());
+
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        int level = sharedPref.getInt("level", 0);
+        String rLevel = "Café pequeno";
+        switch(level){
+            case 0:
+                rLevel = "Café pequeno";
+                break;
+            case 1:
+                rLevel = "Café com leite";
+                break;
+            default:
+                rLevel = "Café grande";
+                break;
+        }
+
+        classUser.setText(rLevel);
         Picasso.with(this).load(Uri.parse(user.getPhotoUrl().toString())).into(imageUser);
 
         mapsFragment = new MapsFragment();
@@ -239,22 +256,19 @@ public class MainActivity extends AppCompatActivity
                 fragmentTransaction.replace(R.id.container, transactionFragment);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
-            /*
+
             } else if (id == R.id.nav_my_top_donator){
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                rankingFragment = new RankingFragment();
-                fragmentTransaction.replace(R.id.container, rankingFragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                Intent intent = new Intent(this, LevelUpFragment.class);
+                intent.putExtra("status", "Level UP");
+                intent.putExtra("text", "Você passou de level, agora você é um usuário pika das galáxias! Agora você pode resgatar muito mais cafés! Continue compartilhando para subir cada vez mais de level!");
+                this.startActivity(intent);
             } else if (id == R.id.nav_top_coffee_shop){
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                rankingFragment = new RankingFragment();
-                fragmentTransaction.replace(R.id.container, rankingFragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                Intent intent = new Intent(this, LevelUpFragment.class);
+                intent.putExtra("status", "Level DOWN");
+                intent.putExtra("text", "Você caiu de level, agora você é um usuário menos pika das galáxias! Agora você pode resgatar um numero menor de cafés! Continue compartilhando para subir de level!");
+                this.startActivity(intent);
             }
-             */
-            }
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -103,7 +103,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void callMain() {
         /**
-        String url = "https://cafesuspenso.herokuapp.com/api/auth";
+        String url = "http://192.168.130.14:8080/api/auth";
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         url += "?name=" + user.getDisplayName().replace(" ", "%") + "&email=" + user.getEmail();
         url += "&urlImage=" + user.getPhotoUrl().toString().replace("&","+") + "&token=" + token.toString();
@@ -130,7 +130,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void fetchCafeterias() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://cafesuspenso.herokuapp.com/api/cafeteria";
+        String url = "http://192.168.130.14:8080/api/cafeteria";
 
         Log.d("Login3", url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -151,7 +151,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "RO1TNoKtrUfNSclm8jQs8L3RMX43");
+                params.put("Authorization", "lucas123");
                 return params;
             }
         };

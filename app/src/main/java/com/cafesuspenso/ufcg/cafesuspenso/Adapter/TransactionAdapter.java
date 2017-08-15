@@ -85,9 +85,9 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         RequestQueue queue = Volley.newRequestQueue(context);
         String url;
         if(!flagType)
-            url = "https://cafesuspenso.herokuapp.com/api/user/shared_products/remove_shared_product/" + t;
+            url = "http://192.168.130.14:8080/api/user/shared_products/remove_shared_product/" + t;
         else
-            url = "https://cafesuspenso.herokuapp.com/api/user/shared_products/remove_redeemed_product/" + t;
+            url = "http://192.168.130.14:8080/api/user/shared_products/remove_redeemed_product/" + t;
 
         Log.d("Login3", url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -105,7 +105,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "RO1TNoKtrUfNSclm8jQs8L3RMX43");
+                params.put("Authorization", "lucas123");
                 return params;
             }
         };

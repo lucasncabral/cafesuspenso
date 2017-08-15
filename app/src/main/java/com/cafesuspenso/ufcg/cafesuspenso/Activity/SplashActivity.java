@@ -39,6 +39,8 @@ public class SplashActivity extends Activity {
 
         loadCafeterias();
 
+        sprint4();
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -50,7 +52,7 @@ public class SplashActivity extends Activity {
 
     private void loadCafeterias() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://cafesuspenso.herokuapp.com/api/cafeteria";
+        String url = "http://192.168.130.14:8080/api/cafeteria";
 
         Log.d("Login3", url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -70,7 +72,7 @@ public class SplashActivity extends Activity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "RO1TNoKtrUfNSclm8jQs8L3RMX43");
+                params.put("Authorization", "lucas123");
                 return params;
             }
         };
@@ -98,5 +100,17 @@ public class SplashActivity extends Activity {
 
         startActivity(i);
         finish();
+    }
+
+
+    private void sprint4() {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("level", 0);
+        editor.putInt("cafesDisponiveis", 2);
+        editor.putInt("cafesResgatados", 4);
+        editor.putInt("cafesCompartilhados", 9);
+        editor.apply();
+
     }
 }
