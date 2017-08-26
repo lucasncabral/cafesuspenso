@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/colorPrimaryLight"
     tools:context="com.cafesuspenso.ufcg.cafesuspenso.Activity.LoginActivity">
 
     <LinearLayout
@@ -47,7 +47,7 @@
                 android:layout_height="100dp"
                 android:layout_margin="30dp"
                 android:gravity="center"
-                android:background="@drawable/border"
+                android:background="@color/colorPrimaryLight"
                 android:orientation="vertical">
 
                 <com.facebook.login.widget.LoginButton
@@ -59,16 +59,7 @@
                     android:paddingBottom="10dp"
                     android:paddingTop="10dp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="@string/more_about_underline"
-                    android:textAlignment="center"
-                    android:textAllCaps="false"
-                    android:textColor="@color/colorAccent"
-                    android:textStyle="bold"
-                    android:typeface="monospace" />
+
             </LinearLayout>
 
 

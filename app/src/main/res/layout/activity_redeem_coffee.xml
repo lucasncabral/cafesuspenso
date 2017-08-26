@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@color/colorAccent"
+    android:background="@color/colorPrimaryLight"
     android:orientation="vertical"
     android:layout_height="match_parent"
     tools:context="com.cafesuspenso.ufcg.cafesuspenso.Activity.RedeemCoffeeActivity">
@@ -79,7 +79,7 @@
         android:textColor="@color/white"
         android:backgroundTint="@color/colorPrimary"
         android:id="@+id/share_btn"
-        android:text="Compartilhar"/>
+        android:text="Compartilhar "/>
 
     </LinearLayout>
 
