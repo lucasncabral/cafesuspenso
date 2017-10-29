@@ -20,8 +20,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.cafesuspenso.ufcg.cafesuspenso.Activity.MainActivity;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Cafeteria;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Connection;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Product;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,7 +48,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -55,16 +66,18 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
     private List<Cafeteria> cafeterias;
     Cafeteria selected;
     private Product product1;
+    private String token;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         main = (MainActivity) getActivity();
         main.moveBottomBarDown();
+        SharedPreferences sharedPref = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        token = sharedPref.getString("token", "");
         getMapAsync(this);
 
     }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -112,48 +125,88 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         });
     }
 
-    private void loadMarkers(GoogleMap mMap) {
-        cafeterias = new ArrayList<>();
-        SharedPreferences sharedPref = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        String JSONMarkers = sharedPref.getString("cafeterias", null);
+    private void loadMarkers(final GoogleMap mMap) {
 
-        if(JSONMarkers != null){
-            Random random = new Random();
-            try {
-                JSONArray responsePost = new JSONArray(JSONMarkers);
-                for (int i = 0; i < responsePost.length(); i++) {
-                    JSONObject marked = responsePost.getJSONObject(i);
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        String url = Connection.getUrl() + "/api/cafeteria";
 
-                    String name = marked.getString("name");
-                    JSONObject location = marked.getJSONObject("location");
-                    LatLng latLng = new LatLng(location.getDouble("lat"),location.getDouble("lng"));
-                    String imagem = marked.getString("imagem");
-                    int qntdCafe = marked.getInt("numberProduct");
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        cafeterias = new ArrayList<>();
+                        SharedPreferences sharedPref = getActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+                        String JSONMarkers = response;
 
-                    JSONObject product = marked.getJSONObject("product");
-                    product1 = new Product(product.getInt("id"), product.getDouble("price"),product.getString("image"), product.getString("description"), product.getBoolean("accepted"), product.getString("name"));
-                    cafeterias.add(new Cafeteria(name,latLng,imagem,qntdCafe, product1));
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+                        if(JSONMarkers != null){
+                            Random random = new Random();
+                            try {
+                                JSONArray responsePost = new JSONArray(JSONMarkers);
+
+                                for (int i = 0; i < responsePost.length(); i++) {
+                                    Log.d("Cafeteria", responsePost.get(i).toString());
+
+                                    JSONObject marked = responsePost.getJSONObject(i);
+
+                                    Long id = marked.getLong("id");
+                                    String name = marked.getString("name");
+                                    JSONObject location = marked.getJSONObject("location");
+                                    LatLng latLng = new LatLng(location.getDouble("lat"),location.getDouble("lng"));
+                                    String imagem = marked.getString("imagem");
+                                    int qntdCafe = marked.getInt("numberProduct");
+
+                                    if (!marked.isNull("product")) {
+                                        JSONObject product = marked.getJSONObject("product");
+                                        product1 = new Product(product.getInt("id"), product.getDouble("price"),product.getString("image"), product.getString("description"), product.getBoolean("accepted"), product.getString("name"));
+                                    } else {
+                                        product1 = null;
+                                    }
+
+                                    Cafeteria cafet = new Cafeteria(name,latLng,imagem,qntdCafe, product1);
+                                    cafet.setId(id);
+                                    cafeterias.add(cafet);
+
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+
+                        Bitmap coffeeBig = BitmapFactory.decodeResource(getResources(), R.drawable.coffee);
+                        Bitmap resized = Bitmap.createScaledBitmap(coffeeBig, 50, 50, true);
+                        BitmapDescriptor coffee = BitmapDescriptorFactory.fromBitmap(resized);
+
+                        Bitmap coffeegrayBig = BitmapFactory.decodeResource(getResources(), R.drawable.coffeegray);
+                        Bitmap resized2 = Bitmap.createScaledBitmap(coffeegrayBig, 50, 50, true);
+                        BitmapDescriptor coffeegray = BitmapDescriptorFactory.fromBitmap(resized2);
+
+                        for(Cafeteria c : cafeterias){
+                            Log.d("Cafeterias", String.valueOf(c.getProduct()));
+                            if (c.getProduct() != null) {
+                                if (c.getAvailableCoffee() > 0) {
+                                    mMap.addMarker(new MarkerOptions().position(c.getLocation()).title(c.getPlacename()).icon(coffee));
+                                } else {
+                                    mMap.addMarker(new MarkerOptions().position(c.getLocation()).title(c.getPlacename()).icon(coffeegray));
+                                }
+                            }
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("LoginE toString", error.toString());
             }
-        }
-
-
-        Bitmap coffeeBig = BitmapFactory.decodeResource(getResources(), R.drawable.coffee);
-        Bitmap resized = Bitmap.createScaledBitmap(coffeeBig, 50, 50, true);
-        BitmapDescriptor coffee = BitmapDescriptorFactory.fromBitmap(resized);
-
-        Bitmap coffeegrayBig = BitmapFactory.decodeResource(getResources(), R.drawable.coffeegray);
-        Bitmap resized2 = Bitmap.createScaledBitmap(coffeegrayBig, 50, 50, true);
-        BitmapDescriptor coffeegray = BitmapDescriptorFactory.fromBitmap(resized2);
-        for(Cafeteria c : cafeterias){
-            if(c.getAvailableCoffee() > 0){
-                mMap.addMarker(new MarkerOptions().position(c.getLocation()).title(c.getPlacename()).icon(coffee));
-            } else {
-                mMap.addMarker(new MarkerOptions().position(c.getLocation()).title(c.getPlacename()).icon(coffeegray));
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", token);
+                return params;
             }
-        }
+        };
+        queue.add(stringRequest);
+
     }
 
     @Override
@@ -283,6 +336,9 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onResume() {
         super.onResume();
+        if (mMap != null) {
+            loadMarkers(mMap);
+        }
 
         verifyGpsState();
     }

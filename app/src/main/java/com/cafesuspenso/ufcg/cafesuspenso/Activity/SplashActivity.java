@@ -18,6 +18,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Connection;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -27,6 +28,7 @@ import java.util.Map;
 
 public class SplashActivity extends Activity {
     private static final long SPLASH_TIME_OUT = 4978;
+    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,8 @@ public class SplashActivity extends Activity {
         myImageView.startAnimation(myFadeInAnimation);
 
         loadCafeterias();
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        token = sharedPref.getString("token", "");
 
         sprint4();
 
@@ -52,7 +56,7 @@ public class SplashActivity extends Activity {
 
     private void loadCafeterias() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://192.168.130.14:8080/api/cafeteria";
+        String url = Connection.getUrl() + "/api/cafeteria";
 
         Log.d("Login3", url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -72,7 +76,7 @@ public class SplashActivity extends Activity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "lucas123");
+                params.put("Authorization", token);
                 return params;
             }
         };

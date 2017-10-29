@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        cafeteriaSelected = new Cafeteria();
+
         if (!isTaskRoot()) {
             final Intent intent = getIntent();
             if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && Intent.ACTION_MAIN.equals(intent.getAction())) {
@@ -99,7 +101,7 @@ public class MainActivity extends AppCompatActivity
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                callCafeteriaActivity();
+                callCafeteriaActivity();moveBottomBarDown();
             }
         });
 
@@ -178,17 +180,22 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onResume() {
+        cardInformation = (CardView) findViewById(R.id.information_card);
+        super.onResume();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if (result != null) {
             if (result.getContents() == null){
                 Toast.makeText(this, getString(R.string.qr_code_fail_menssage), Toast.LENGTH_LONG).show();
             }else {
-                Log.d("QRCODE", "QRCODE1");
                 Intent readerIntent = new Intent(this, CafeteriaActivity.class);
                 Bundle bundle = new Bundle();
-
-                bundle.putString("qrCodeData", result.getContents());
+                readerIntent.putExtra("cafeteria", result.getContents());
+                bundle.putString("cafeteria", result.getContents());
                 bundle.putBoolean("qrCode", true);
                 readerIntent.putExtras(bundle);
                 startActivity(readerIntent);
@@ -217,7 +224,6 @@ public class MainActivity extends AppCompatActivity
         // TODO mudar fragment aqui
         if(id == R.id.nav_map){
             fab.setVisibility(View.VISIBLE);
-            cardInformation.setVisibility(View.VISIBLE);
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.container, mapsFragment);
             fragmentTransaction.addToBackStack(null);
@@ -257,18 +263,7 @@ public class MainActivity extends AppCompatActivity
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
 
-            } else if (id == R.id.nav_my_top_donator){
-                Intent intent = new Intent(this, LevelUpFragment.class);
-                intent.putExtra("status", "Level UP");
-                intent.putExtra("text", "Você passou de level, agora você é um usuário pika das galáxias! Agora você pode resgatar muito mais cafés! Continue compartilhando para subir cada vez mais de level!");
-                this.startActivity(intent);
-            } else if (id == R.id.nav_top_coffee_shop){
-                Intent intent = new Intent(this, LevelUpFragment.class);
-                intent.putExtra("status", "Level DOWN");
-                intent.putExtra("text", "Você caiu de level, agora você é um usuário menos pika das galáxias! Agora você pode resgatar um numero menor de cafés! Continue compartilhando para subir de level!");
-                this.startActivity(intent);
             }
-
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

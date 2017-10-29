@@ -67,10 +67,13 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:layout_marginBottom="20dp"
-        android:layout_height="50dp">
+        android:layout_marginBottom="24dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:weightSum="1">
 
         <Button
             android:id="@+id/share_btn"
@@ -83,14 +86,14 @@
             android:textColor="@color/white" />
 
         <Button
-            android:layout_width="170dp"
-            android:layout_height="match_parent"
-            android:background="@drawable/border"
-            android:layout_marginLeft="20dp"
-            android:textColor="@color/white"
-            android:backgroundTint="@color/colorPrimaryDark"
             android:id="@+id/redeem_btn"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="25dp"
+            android:background="@drawable/border"
+            android:backgroundTint="@color/colorPrimaryDark"
             android:text="Resgatar"
-            android:layout_marginRight="10dp"/>
+            android:textColor="@color/white" />
     </LinearLayout>
 </RelativeLayout>

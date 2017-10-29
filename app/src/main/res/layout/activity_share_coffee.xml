@@ -22,13 +22,20 @@
     <TextView
         android:id="@+id/descriptionPlace"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="30dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
         android:text="Compartilhando um item, você pode..."
         android:textAlignment="center"
         android:textColor="@color/white" />
+
+    <ImageView
+        android:id="@+id/imageProduct"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:src="@color/colorPrimaryLight" />
 
     <TextView
         android:layout_width="match_parent"

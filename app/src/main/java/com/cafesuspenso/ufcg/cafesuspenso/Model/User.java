@@ -1,12 +1,15 @@
 package com.cafesuspenso.ufcg.cafesuspenso.Model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.cafesuspenso.ufcg.cafesuspenso.Enums.TypeUser;
 
 /**
  * Created by Lucas on 16/06/2017.
  */
 
-public class User {
+public class User implements Parcelable {
     private Long id;
     private String name;
     private String email;
@@ -62,4 +65,38 @@ public class User {
     public void setTypeUser(TypeUser typeUser) {
         this.typeUser = typeUser;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeString(name);
+        dest.writeString(email);
+        dest.writeString(password);
+        dest.writeValue(typeUser);
+    }
+
+    protected User(Parcel in) {
+        id = in.readLong();
+        name = in.readString();
+        email = in.readString();
+        password = in.readString();
+        typeUser = (TypeUser) in.readValue(ClassLoader.getSystemClassLoader());
+    }
+
+    public static final Creator<User> CREATOR = new Creator<User>() {
+        @Override
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
 }

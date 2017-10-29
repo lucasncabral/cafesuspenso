@@ -3,6 +3,7 @@ package com.cafesuspenso.ufcg.cafesuspenso.Adapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -21,6 +22,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Connection;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Transaction;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.cafesuspenso.ufcg.cafesuspenso.Task.DownloadImageTask;
@@ -40,12 +42,16 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     private final LayoutInflater layoutInflater;
     private Context context;
     private List<Transaction> transactions;
+    private String token;
 
     public TransactionAdapter(Context context, List<Transaction> transactions, boolean flag){
         this.context = context;
         this.transactions = transactions;
         flagType = flag;
         this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        SharedPreferences sharedPref = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        token = sharedPref.getString("token", "");
 
     }
 
@@ -85,9 +91,9 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         RequestQueue queue = Volley.newRequestQueue(context);
         String url;
         if(!flagType)
-            url = "http://192.168.130.14:8080/api/user/shared_products/remove_shared_product/" + t;
+            url = Connection.getUrl() + "/api/user/shared_products/remove_shared_product/" + t;
         else
-            url = "http://192.168.130.14:8080/api/user/shared_products/remove_redeemed_product/" + t;
+            url = Connection.getUrl() + "/api/user/shared_products/remove_redeemed_product/" + t;
 
         Log.d("Login3", url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -105,7 +111,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "lucas123");
+                params.put("Authorization", token);
                 return params;
             }
         };

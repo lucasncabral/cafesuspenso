@@ -1,6 +1,8 @@
 package com.cafesuspenso.ufcg.cafesuspenso.Fragment;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -22,6 +24,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.cafesuspenso.ufcg.cafesuspenso.Adapter.TransactionAdapter;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Cafeteria;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Connection;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Product;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Transaction;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
@@ -47,10 +50,14 @@ public class MyTransactionsFragment extends Fragment {
     private String title;
     private TextView titleFragment;
     private boolean flag;
+    private String token;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences sharedPref = getActivity().getSharedPreferences(getActivity().getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        token = sharedPref.getString("token", "");
     }
 
     @Nullable
@@ -105,7 +112,7 @@ public class MyTransactionsFragment extends Fragment {
 
     public void getTransactionsShared() {
         RequestQueue queue = Volley.newRequestQueue(getContext());
-        String url = "http://192.168.130.14:8080/api/user/shared_products";
+        String url = Connection.getUrl() + "/api/user/shared_products";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -123,7 +130,7 @@ public class MyTransactionsFragment extends Fragment {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "lucas123");
+                params.put("Authorization", token);
                 return params;
             }
         };
@@ -132,7 +139,7 @@ public class MyTransactionsFragment extends Fragment {
 
     public void getTransactionsRedeemed() {
         RequestQueue queue = Volley.newRequestQueue(getContext());
-        String url = "http://192.168.130.14:8080/api/user/redeem_products";
+        String url = Connection.getUrl() + "/api/user/redeem_product";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -150,7 +157,7 @@ public class MyTransactionsFragment extends Fragment {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "lucas123");
+                params.put("Authorization", token);
                 return params;
             }
         };

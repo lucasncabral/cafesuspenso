@@ -10,25 +10,21 @@ import com.google.android.gms.maps.model.LatLng;
  * Created by Lucas on 16/06/2017.
  */
 
-public class Cafeteria extends User implements Parcelable {
+public class Cafeteria implements Parcelable {
+    private Long id;
     private String placename;
-    private Boolean active;
     private String complement;
-    private String cnpj;
     private LatLng location;
     private String imagem;
     private byte[] qrCodePic;
     private int availableCoffee;
     private Product product;
 
-    public Cafeteria(String name, String email, String password, String placename, String complement, String cnpj, LatLng location, String imagem) {
-        super(name, email, password, TypeUser.CAFETERIA);
+    public Cafeteria(String placename, String complement, LatLng location, String imagem) {
         this.placename = placename;
         this.complement = complement;
-        this.cnpj = cnpj;
         this.location = location;
         this.imagem = imagem;
-        this.active = Boolean.FALSE;
     }
 
     public Cafeteria(String name, LatLng location, String imagem, int availableCoffee, Product product){
@@ -40,9 +36,9 @@ public class Cafeteria extends User implements Parcelable {
     }
 
     protected Cafeteria(Parcel in) {
+        id = in.readLong();
         placename = in.readString();
         complement = in.readString();
-        cnpj = in.readString();
         location = in.readParcelable(LatLng.class.getClassLoader());
         imagem = in.readString();
         qrCodePic = in.createByteArray();
@@ -69,6 +65,17 @@ public class Cafeteria extends User implements Parcelable {
     public Cafeteria() {
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 
     public String getPlacename() {
         return placename;
@@ -78,28 +85,12 @@ public class Cafeteria extends User implements Parcelable {
         this.placename = placename;
     }
 
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
     public String getComplement() {
         return complement;
     }
 
     public void setComplement(String complement) {
         this.complement = complement;
-    }
-
-    public String getCnpj() {
-        return cnpj;
-    }
-
-    public void setCnpj(String cnpj) {
-        this.cnpj = cnpj;
     }
 
     public LatLng getLocation() {
@@ -141,10 +132,9 @@ public class Cafeteria extends User implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-
+        parcel.writeLong(id);
         parcel.writeString(placename);
         parcel.writeString(complement);
-        parcel.writeString(cnpj);
         parcel.writeParcelable(location, i);
         parcel.writeString(imagem);
         parcel.writeByteArray(qrCodePic);

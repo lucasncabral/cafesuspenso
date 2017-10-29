@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +29,7 @@ import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.TransactionDetails;
 import com.cafesuspenso.ufcg.cafesuspenso.Fragment.LevelUpFragment;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Cafeteria;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Connection;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Product;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.facebook.CallbackManager;
@@ -36,6 +38,7 @@ import com.facebook.FacebookException;
 import com.facebook.share.Sharer;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
+import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +51,8 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
     private Cafeteria cafeteria;
     private Product product;
     private int qntdDisponiveis, resgatados, compartilhados, level;
+    private ImageView imageProduct;
+    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,15 +64,19 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
         TextView name = (TextView) findViewById(R.id.txt_name_product);
         TextView price = (TextView) findViewById(R.id.txt_preco);
 
+        imageProduct = (ImageView) findViewById(R.id.imageProduct);
+
         name.setText(cafeteria.getProduct().getName());
         price.setText("R$ " + cafeteria.getProduct().getPrice());
 
-
-
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         qntdDisponiveis = sharedPref.getInt("cafesDisponiveis", 0);
+        token = sharedPref.getString("token", "");
         resgatados = sharedPref.getInt("cafesResgatados", 0);
         compartilhados = sharedPref.getInt("cafesCompartilhados", 0);
+        Picasso.with(this).load(Uri.parse(cafeteria.getProduct().getImage())).centerCrop().resize(160, 160)
+                .into(imageProduct);
+
         level = sharedPref.getInt("level", 0);
 
         /*
@@ -103,21 +112,24 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
         share.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //shop();
-                calculateLevel();
+//                shop();
+                toServer();
             }
         });
     }
 
     private void shop() {
-        //if(bp.isPurchased("android.test.purchased"))
-          //  bp.consumePurchase("android.test.purchased");
+        if(bp.isPurchased("android.test.purchased"))
+            bp.consumePurchase("android.test.purchased");
         bp.purchase(this, "cafesuspenso.cafe");
     }
 
     @Override
     public void onBackPressed() {
         // super.onBackPressed();
+        Intent intent = new Intent(getApplicationContext(), CafeteriaActivity.class);
+        intent.putExtra("cafeteria", cafeteria);
+        startActivity(intent);
         finish();
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
@@ -125,8 +137,6 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
     @Override
     public void onProductPurchased(String productId, TransactionDetails details) {
         toServer();
-
-        calculateLevel();
 
         new AlertDialog.Builder(this)
                 .setMessage("Deseja compartilhar em suas redes sociais?")
@@ -173,13 +183,19 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
 
     private void toServer() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://192.168.130.14:8080/api/user/shared_products/" + cafeteria.getId() + "/" + cafeteria.getProduct().getId();
+        String url = Connection.getUrl() + "/api/user/shared_products/" + cafeteria.getId() + "/" + cafeteria.getProduct().getId();
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        // openLoginScreen();
+                        Intent readerIntent = new Intent(getApplicationContext(), CafeteriaActivity.class);
+                        Bundle bundle = new Bundle();
+                        cafeteria.setAvailableCoffee(cafeteria.getAvailableCoffee() + 1);
+                        readerIntent.putExtra("cafeteria", cafeteria);
+                        bundle.putBoolean("qrCode", true);
+                        readerIntent.putExtras(bundle);
+                        calculateLevel();
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -190,7 +206,7 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "lucas123");
+                params.put("Authorization", token);
                 return params;
             }
         };
@@ -200,7 +216,8 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
     private void shareWithFacebook() {
         if (ShareDialog.canShow(ShareLinkContent.class)) {
             ShareLinkContent linkContent = new ShareLinkContent.Builder()
-                    .setContentUrl(Uri.parse("https://cafesuspenso.herokuapp.com"))
+                    .setContentUrl(Uri.parse(Connection.getUrl() + ""))
+                    .setQuote("Café Suspenso")
                     .setContentTitle("Café Suspenso")
                     .setContentDescription("Resgatei um café")
                     .build();

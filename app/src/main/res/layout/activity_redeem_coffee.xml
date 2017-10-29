@@ -79,7 +79,7 @@
         android:textColor="@color/white"
         android:backgroundTint="@color/colorPrimary"
         android:id="@+id/share_btn"
-        android:text="Compartilhar "/>
+        android:text="Resgatar"/>
 
     </LinearLayout>
 

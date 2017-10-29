@@ -23,6 +23,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.cafesuspenso.ufcg.cafesuspenso.Fragment.LevelUpFragment;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Cafeteria;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Connection;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -34,6 +35,7 @@ import com.facebook.share.widget.ShareDialog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +50,7 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
     private String code;
     private Cafeteria cafeteria;
     private int qntdDisponiveis, resgatados, compartilhados, level;
+    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,12 +60,12 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
         shareBtn = (Button) findViewById(R.id.share_btn);
         cafeteria = getIntent().getParcelableExtra("cafeteria");
 
-
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         qntdDisponiveis = sharedPref.getInt("cafesDisponiveis", 0);
         resgatados = sharedPref.getInt("cafesResgatados", 0);
         compartilhados = sharedPref.getInt("cafesCompartilhados", 0);
         level = sharedPref.getInt("level", 0);
+        token = sharedPref.getString("token", "");
 
 
         codeRedeem.setText("");
@@ -111,7 +114,8 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
 
     private void generateCode() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://192.168.130.14:8080/api/user/push_code/" + 1 + "/" + 1;
+
+        String url = Connection.getUrl() + "/api/user/push_code/" + cafeteria.getId() + "/" + cafeteria.getProduct().getId();
         Log.d("urlqweqs", url);
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -121,7 +125,7 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
                         Log.d("urlqweqs", response);
 
                         try {
-                            code = new JSONArray(response).getJSONObject(0).getString("code");
+                            code = new JSONObject(response).getString("code");
                             codeRedeem.setText(code);
                             shareBtn.setVisibility(View.GONE);
                             diminuiCafe();
@@ -138,7 +142,7 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "lucas123");
+                params.put("Authorization", token);
                 return params;
             }
         };
@@ -184,7 +188,7 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
     private void showShareFragment() {
         if (ShareDialog.canShow(ShareLinkContent.class)) {
             ShareLinkContent linkContent = new ShareLinkContent.Builder()
-                    .setContentUrl(Uri.parse("https://cafesuspenso.herokuapp.com"))
+                    .setContentUrl(Uri.parse(Connection.getUrl() + ""))
                     .setContentTitle("Café Suspenso")
                     .setContentDescription("Resgatei um café")
                     .build();
@@ -201,6 +205,9 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // super.onBackPressed();
+        Intent intent = new Intent(getApplicationContext(), CafeteriaActivity.class);
+        intent.putExtra("cafeteria", cafeteria);
+        startActivity(intent);
         finish();
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }

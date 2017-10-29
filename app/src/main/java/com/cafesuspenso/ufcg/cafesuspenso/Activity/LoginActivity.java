@@ -19,6 +19,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.cafesuspenso.ufcg.cafesuspenso.Model.Connection;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -73,6 +74,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 token = loginResult.getAccessToken().toString();
+
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
@@ -102,56 +104,67 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void callMain() {
-        /**
-        String url = "http://192.168.130.14:8080/api/auth";
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = Connection.getUrl() + "/api/auth";
+
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         url += "?name=" + user.getDisplayName().replace(" ", "%") + "&email=" + user.getEmail();
         url += "&urlImage=" + user.getPhotoUrl().toString().replace("&","+") + "&token=" + token.toString();
 
-        Log.d("Login1", url);
+        Log.d("urlGerada", url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         Log.d("Login2", "Logado");
                         fetchCafeterias();
+                        saveToken();
                     }
                 }, new Response.ErrorListener() {
-
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d("Login", "erro login");
             }
-        });
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", token.toString());
+                return params;
+            }
+        };
         queue.add(stringRequest);
-         */
         fetchCafeterias();
+    }
+
+    private void saveToken() {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("token", token.toString());
+        editor.apply();
     }
 
     private void fetchCafeterias() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://192.168.130.14:8080/api/cafeteria";
+        String url = Connection.getUrl() + "/api/cafeteria";
 
-        Log.d("Login3", url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.d("Login4", response);
                         saveMarkers(response, "cafeterias");
                         startMain();
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("LoginE toString", error.toString());
                 startMain();
             }
         }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization", "lucas123");
+                params.put("Authorization", token.toString());
                 return params;
             }
         };
