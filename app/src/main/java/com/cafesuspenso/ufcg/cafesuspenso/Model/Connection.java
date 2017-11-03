@@ -5,9 +5,10 @@ package com.cafesuspenso.ufcg.cafesuspenso.Model;
  */
 
 public class Connection {
-    public static final String URL = "http://192.168.43.15:8080";
+    public static final String URL = "http://192.168.1.6:8080";
 
     public static String getUrl() {
         return URL;
     }
+
 }

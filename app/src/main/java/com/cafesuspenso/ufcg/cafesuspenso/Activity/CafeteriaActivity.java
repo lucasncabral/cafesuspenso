@@ -81,6 +81,7 @@ public class CafeteriaActivity extends AppCompatActivity {
                         Intent i = new Intent(getApplicationContext(), RedeemCoffeeActivity.class);
                         i.putExtra("cafeteria", getIntent().getParcelableExtra("cafeteria"));
                         startActivity(i);
+                        finish();
                         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                     } else {
                         Toast.makeText(getApplicationContext(), "Não há café disponível para resgate.", Toast.LENGTH_SHORT).show();
@@ -102,7 +103,6 @@ public class CafeteriaActivity extends AppCompatActivity {
 
     private void setInformationCafeteria(QRCodeData qrCodeObject) {
         namePlace.setText(qrCodeObject.getName());
-        // Log.d("QRCODE", qrCodeObject.getPlaceImg());
         Picasso.with(this).load(qrCodeObject.getPlaceImg()).fit().into(imagePlace);
         countCoffee.setText(qrCodeObject.getNumCoffees()+"");
 

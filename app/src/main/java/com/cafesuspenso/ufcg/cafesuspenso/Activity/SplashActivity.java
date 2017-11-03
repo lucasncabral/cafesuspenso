@@ -19,6 +19,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Connection;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.MainActivity2;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.google.firebase.auth.FirebaseAuth;
 

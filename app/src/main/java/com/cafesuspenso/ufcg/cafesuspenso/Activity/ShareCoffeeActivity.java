@@ -1,5 +1,6 @@
 package com.cafesuspenso.ufcg.cafesuspenso.Activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,12 +26,23 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.anjlab.android.iab.v3.BillingProcessor;
-import com.anjlab.android.iab.v3.TransactionDetails;
 import com.cafesuspenso.ufcg.cafesuspenso.Fragment.LevelUpFragment;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Cafeteria;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Connection;
 import com.cafesuspenso.ufcg.cafesuspenso.Model.Product;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.AppUtil;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.MainActivity2;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.PagSeguroAddress;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.PagSeguroAreaCode;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.PagSeguroBrazilianStates;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.PagSeguroBuyer;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.PagSeguroCheckout;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.PagSeguroFactory;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.PagSeguroItem;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.PagSeguroPayment;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.PagSeguroPhone;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.PagSeguroShipping;
+import com.cafesuspenso.ufcg.cafesuspenso.PagseguroDemo.PagSeguroShippingType;
 import com.cafesuspenso.ufcg.cafesuspenso.R;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -40,12 +52,14 @@ import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
 import com.squareup.picasso.Picasso;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class ShareCoffeeActivity extends AppCompatActivity implements BillingProcessor.IBillingHandler{
+public class ShareCoffeeActivity extends AppCompatActivity {
 
-    private BillingProcessor bp;
     private ShareDialog shareDialog;
     private CallbackManager callbackManager;
     private Cafeteria cafeteria;
@@ -53,6 +67,9 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
     private int qntdDisponiveis, resgatados, compartilhados, level;
     private ImageView imageProduct;
     private String token;
+
+    // Pagamento
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +105,6 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
         */
 
 
-        bp = new BillingProcessor(this, "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtoArILztD40ekBXJ9a2QjDXbxCsTwF8rNw2+w3htDaWEHNy6IZHi5ZEwPhHGDK6t/BurtZdN6tsB1/8YPPu9yJyAbogiXeZFU8SBt5Sef1RFXc/wW7ovc5uystFliMgA36rcW5bknbdnyLF36oLuaT8xENft8+f274W19KfcllgET1b6ff2JAdae0BAIK0IMMiut8pBxEhVbFW+kLLI/UifhuJm/OhTj4gQWbwMqAD3jiX5cbayFYzu4T/bd/ak2FZED/L7XzKJwH9b5knhM0c/J91ASTJh1qsmwZXzvvdDFOTf5Su3/ZvieXv0tZrOX2nixYv4MGiDlHxSldthhwQIDAQA", this);
         callbackManager = CallbackManager.Factory.create();
         shareDialog = new ShareDialog(this);
         // this part is optional
@@ -112,30 +128,27 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
         share.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                shop();
-                toServer();
+                pay();
+                //shop();
             }
         });
+
+    }
+
+    void pay(){
+        final PagSeguroFactory pagseguro = PagSeguroFactory.instance();
+        List<PagSeguroItem> shoppingCart = new ArrayList<>();
+        shoppingCart.add(pagseguro.item("123", "Café Suspenso", BigDecimal.valueOf(1.00), 1, 300));
+        PagSeguroPhone buyerPhone = pagseguro.phone(PagSeguroAreaCode.DDD83, "987914492");
+        PagSeguroBuyer buyer = pagseguro.buyer("Lucas Cabral", "23/07/1996", "07642762470", "test@email.com.br", buyerPhone);
+        PagSeguroAddress buyerAddress = pagseguro.address("Rua Riachuelo", "1540", "Casa", "Jardim Paulistano", "51030330", "Campina Grande", PagSeguroBrazilianStates.PARAIBA);
+        PagSeguroShipping buyerShippingOption = pagseguro.shipping(PagSeguroShippingType.PAC, buyerAddress);
+        PagSeguroCheckout checkout = pagseguro.checkout("Ref0001", shoppingCart, buyer, buyerShippingOption);
+        // starting payment process
+        new PagSeguroPayment(this).pay(checkout.buildCheckoutXml());
     }
 
     private void shop() {
-        if(bp.isPurchased("android.test.purchased"))
-            bp.consumePurchase("android.test.purchased");
-        bp.purchase(this, "cafesuspenso.cafe");
-    }
-
-    @Override
-    public void onBackPressed() {
-        // super.onBackPressed();
-        Intent intent = new Intent(getApplicationContext(), CafeteriaActivity.class);
-        intent.putExtra("cafeteria", cafeteria);
-        startActivity(intent);
-        finish();
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-    }
-
-    @Override
-    public void onProductPurchased(String productId, TransactionDetails details) {
         toServer();
 
         new AlertDialog.Builder(this)
@@ -146,6 +159,16 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
                         shareWithFacebook();
                     }})
                 .setNegativeButton(android.R.string.no, null).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        // super.onBackPressed();
+        Intent intent = new Intent(getApplicationContext(), CafeteriaActivity.class);
+        intent.putExtra("cafeteria", cafeteria);
+        startActivity(intent);
+        finish();
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     private void calculateLevel() {
@@ -225,34 +248,49 @@ public class ShareCoffeeActivity extends AppCompatActivity implements BillingPro
         }
     }
 
-    @Override
-    public void onPurchaseHistoryRestored() {
-
-    }
-
-    @Override
-    public void onBillingError(int errorCode, Throwable error) {
-        Toast.makeText(this,"Erro na compra", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onBillingInitialized() {
-
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (!bp.handleActivityResult(requestCode, resultCode, data)) {
-            super.onActivityResult(requestCode, resultCode, data);
-            callbackManager.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_CANCELED) {
+            // se foi uma tentativa de pagamento
+            if(requestCode==PagSeguroPayment.PAG_SEGURO_REQUEST_CODE){
+                // exibir confirmação de cancelamento
+                final String msg = getString(R.string.transaction_cancelled);
+                AppUtil.showConfirmDialog(this, msg, null);
+            }
+        } else if (resultCode == RESULT_OK) {
+            // se foi uma tentativa de pagamento
+            if(requestCode==PagSeguroPayment.PAG_SEGURO_REQUEST_CODE){
+                // exibir confirmação de sucesso
+                final String msg = getString(R.string.transaction_succeded);
+                shop();
+                //AppUtil.showConfirmDialog(this, msg, null);
+            }
+        }
+        else if(resultCode == PagSeguroPayment.PAG_SEGURO_REQUEST_CODE){
+            switch (data.getIntExtra(PagSeguroPayment.PAG_SEGURO_EXTRA, 0)){
+                case PagSeguroPayment.PAG_SEGURO_REQUEST_SUCCESS_CODE:{
+                    final String msg =getString(R.string.transaction_succeded);
+                    shop();
+                    //AppUtil.showConfirmDialog(this,msg,null);
+                    break;
+                }
+                case PagSeguroPayment.PAG_SEGURO_REQUEST_FAILURE_CODE:{
+                    final String msg = getString(R.string.transaction_error);
+                    AppUtil.showConfirmDialog(this,msg,null);
+                    break;
+                }
+                case PagSeguroPayment.PAG_SEGURO_REQUEST_CANCELLED_CODE:{
+                    final String msg = getString(R.string.transaction_cancelled);
+                    AppUtil.showConfirmDialog(this,msg,null);
+                    break;
+                }
+            }
         }
     }
 
     @Override
     public void onDestroy() {
-        if (bp != null) {
-            bp.release();
-        }
         super.onDestroy();
     }
 }
